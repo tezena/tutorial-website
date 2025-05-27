@@ -9,7 +9,7 @@ import { CodeEditor } from "@/components/code-editor"
 interface ContentItem {
   type: string
   level?: number
-  content: string
+  content?: string
   language?: string
   items?: string[]
   ordered?: boolean
@@ -69,7 +69,7 @@ export function LatexRenderer({ content }: LatexRendererProps) {
     switch (item.type) {
       case "heading":
         const HeadingTag = `h${item.level}` as keyof JSX.IntrinsicElements
-        const headingId = item.content.toLowerCase().replace(/\s+/g, "-")
+        const headingId = item.content?.toLowerCase().replace(/\s+/g, "-")
 
         return (
           <HeadingTag
@@ -79,22 +79,22 @@ export function LatexRenderer({ content }: LatexRendererProps) {
               item.level === 1 ? "text-3xl mt-8 mb-4" : item.level === 2 ? "text-2xl mt-8 mb-4" : "text-xl mt-6 mb-3"
             }`}
           >
-            {escapeText(item.content)}
+            {escapeText(item?.content ?? "")}
           </HeadingTag>
         )
 
       case "paragraph":
-        return <p key={index} className="my-4" dangerouslySetInnerHTML={{ __html: escapeText(item.content) }} />
+        return <p key={index} className="my-4" dangerouslySetInnerHTML={{ __html: escapeText(item?.content ?? "") }} />
 
       case "math":
         // Directly use MathFormula component for math content
-        return <MathFormula key={index} formula={item.content} display={true} className="my-4" />
+        return <MathFormula key={index} formula={item?.content ?? ""} display={true} className="my-4" />
 
       case "code":
         return (
           <div key={index} className="my-4">
             <CodeEditor
-              code={item.content}
+              code={item?.content?? ""}
               language={item.language || "text"}
               readOnly={false}
               showLineNumbers={true}

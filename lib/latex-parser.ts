@@ -19,6 +19,7 @@ export type LatexContent =
   | { type: 'code'; language: string; content: string }
   | { type: 'list'; ordered: boolean; items: string[] }
 
+  
 interface Metadata {
   description?: string
   category?: string

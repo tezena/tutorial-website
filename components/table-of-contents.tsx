@@ -6,29 +6,40 @@ import { ChevronRight } from "lucide-react"
 interface ContentItem {
   type: string
   level?: number
-  content: string
+  content?: string
 }
 
 interface TableOfContentsProps {
   content: ContentItem[]
 }
 
+// Utility: Slugify heading text for IDs
+const slugify = (text: string): string =>
+  text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-")     // Replace spaces with dashes
+    .replace(/-+/g, "-")      // Remove duplicate dashes
+    .replace(/^-|-$/g, "")    // Trim leading/trailing dashes
+
+// Type guard for headings
+function isHeading(
+  item: ContentItem
+): item is Required<Pick<ContentItem, "content" | "level">> & { type: "heading" } {
+  return item.type === "heading" && typeof item.content === "string" && typeof item.level === "number"
+}
+
 export function TableOfContents({ content }: TableOfContentsProps) {
   const [activeSection, setActiveSection] = useState("")
 
-  // This would track scroll position and update the active section
   useEffect(() => {
     const handleScroll = () => {
-      // Logic to determine which section is currently in view
-      // and update activeSection state
       const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6")
       const scrollPosition = window.scrollY
-
       let currentSection = ""
 
       headings.forEach((heading) => {
         const top = heading.getBoundingClientRect().top + window.scrollY - 100
-
         if (scrollPosition >= top) {
           currentSection = heading.id
         }
@@ -40,18 +51,18 @@ export function TableOfContents({ content }: TableOfContentsProps) {
     }
 
     window.addEventListener("scroll", handleScroll)
-    handleScroll() // Call once on mount to set initial active section
+    handleScroll() // Set initial active section
 
     return () => window.removeEventListener("scroll", handleScroll)
   }, [activeSection])
 
-  // Generate table of contents from content
   const tocItems = content
-    .filter((item) => item.type === "heading" && item.level && item.level <= 3)
+    .filter(isHeading)
+    .filter((item) => item.level <= 3)
     .map((item) => ({
-      id: item.content.toLowerCase().replace(/\s+/g, "-"),
+      id: slugify(item.content),
       title: item.content,
-      level: item.level as number,
+      level: item.level,
     }))
 
   return (
@@ -73,7 +84,9 @@ export function TableOfContents({ content }: TableOfContentsProps) {
                 }
               }}
             >
-              {activeSection === item.id && <ChevronRight className="h-3 w-3 mr-1 flex-shrink-0" />}
+              {activeSection === item.id && (
+                <ChevronRight className="h-3 w-3 mr-1 flex-shrink-0" />
+              )}
               <span className={activeSection === item.id ? "" : "ml-4"}>{item.title}</span>
             </a>
           </li>

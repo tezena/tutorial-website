@@ -9,9 +9,18 @@ import { LatexRenderer } from "@/components/latex-renderer"
 import { TableOfContents } from "@/components/table-of-contents"
 import { getAllTutorials, getTutorialBySlug } from "@/lib/tutorials"
 
-export default async function TutorialPage({ params }: { params: { slug: string } }) {
+
+
+type Params = {
+  params: {
+    slug: string;
+  };
+};
+
+export default async function TutorialPage({ params }: Params) {
   try {
-    const tutorial = await getTutorialBySlug(params.slug)
+    const { slug } = await params;
+    const tutorial = await getTutorialBySlug(slug)
     const allTutorials = await getAllTutorials()
 
     if (!tutorial) {
@@ -19,7 +28,7 @@ export default async function TutorialPage({ params }: { params: { slug: string 
     }
 
     // Find the current tutorial index
-    const currentIndex = allTutorials.findIndex((t) => t.slug === params.slug)
+    const currentIndex = allTutorials.findIndex((t) => t.slug === slug)
 
     // Get previous and next tutorials
     const prevTutorial = currentIndex > 0 ? allTutorials[currentIndex - 1] : null
@@ -114,7 +123,8 @@ export default async function TutorialPage({ params }: { params: { slug: string 
       </div>
     )
   } catch (error) {
-    console.error(`Error loading tutorial ${params.slug}:`, error)
+     const { slug } = params;
+    console.error(`Error loading tutorial ${slug}:`, error)
     notFound()
   }
 }
