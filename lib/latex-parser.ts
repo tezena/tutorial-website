@@ -4,6 +4,7 @@
 
 export interface ParsedLatex {
   title: string
+  order?:number
   description?: string
   category?: string
   tags?: string[]
@@ -19,10 +20,11 @@ export type LatexContent =
   | { type: 'code'; language: string; content: string }
   | { type: 'list'; ordered: boolean; items: string[] }
 
-  
+
 interface Metadata {
   description?: string
   category?: string
+  order?:number
   tags?: string[]
   date?: string
 } 
@@ -35,6 +37,7 @@ export function parseLatex(latexContent: string): ParsedLatex {
   return {
     title,
     description: metadata.description,
+    order:metadata.order,
     category: metadata.category,
     tags: metadata.tags,
     date: metadata.date,
@@ -51,10 +54,12 @@ function extractTitle(latexContent: string): string | null {
 function extractMetadata(latexContent: string): Metadata {
   const dateMatch = latexContent.match(/\\date\{([^}]+)\}/)
   const descriptionMatch = latexContent.match(/\\begin\{abstract\}([\s\S]*?)\\end\{abstract\}/)
+  const orderMatch = latexContent.match(/\\order\{([^}]+)\}/);
 
   return {
     description: descriptionMatch ? descriptionMatch[1].trim() : undefined,
     date: dateMatch ? dateMatch[1] : undefined,
+    order: orderMatch ? parseInt(orderMatch[1]) : undefined, // Convert to number
     tags: extractTags(latexContent),
     category: extractCategory(latexContent),
   }
@@ -132,7 +137,7 @@ function processSectionContent(content: string, result: LatexContent[]): void {
       trimmedParagraph.startsWith("\\begin{equation}") ||
       trimmedParagraph.startsWith("\\begin{align}") ||
       trimmedParagraph.startsWith("\\[") ||
-      trimmedParagraph.includes("$$")
+      trimmedParagraph.startsWith("$$")
     ) {
       extractMathContent(trimmedParagraph, result)
       continue

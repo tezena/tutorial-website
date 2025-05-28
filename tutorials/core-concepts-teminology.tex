@@ -6,6 +6,7 @@
 \usepackage{hyperref}
 
 \title{Core Concepts}
+\order{4}
 
 \begin{document}
 
@@ -203,25 +204,19 @@ In more detail:
 \paragraph{Explanation of steps}
 
 \begin{enumerate}
-
   \item Compute \texttt{Z = universe-size}, the total number of atoms in the AtomSpace.
-
-
   \item For a pattern with support \texttt{obs-count}, compute its observed probability
-
         $$
           p_{\rm obs} = \frac{\texttt{obs-count}}{Z}.
         $$
   \item Compute the expected probability \texttt{p\_exp} by assuming each clause is independent:
-
   \begin{itemize}
-
     \item For two clauses $$(\{c_1,c_2\}\):
 
       $$
          p_{\rm exp} = P(c_1)\times P(c_2).
       $$
-
+      
     \item For three clauses
             $${c_1,c_2,c_3}$$
             

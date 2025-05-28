@@ -6,6 +6,7 @@ import { parseLatex, ParsedLatex, LatexContent } from "./latex-parser"
 export interface Tutorial {
   slug: string
   title: string
+  order?:number
   description: string
   category: string
   tags: string[]
@@ -48,10 +49,12 @@ export async function getTutorialBySlug(slug: string): Promise<Tutorial | null> 
 
     // Parse the LaTeX content with proper typing
     const parsedContent: ParsedLatex = parseLatex(fileContent)
+    
 
     return {
       slug,
       title: parsedContent.title || slug,
+      order:parsedContent.order  ,
       description: parsedContent.description || `A tutorial on ${slug}`,
       category: parsedContent.category || "Uncategorized",
       tags: parsedContent.tags || [],
@@ -80,10 +83,22 @@ export async function getAllTutorials(): Promise<Tutorial[]> {
     slugs.map(async (slug) => await getTutorialBySlug(slug))
   )
 
-  // Filter out null values and sort by date (newest first)
+// Filter out null values and sort by order (then by date as fallback)
   return tutorials
     .filter((tutorial): tutorial is Tutorial => tutorial !== null)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .sort((a, b) => {
+      // Get order values (default to Infinity if undefined, so they appear last)
+      const orderA = a.order ?? Infinity;
+      const orderB = b.order ?? Infinity;
+      
+      // First sort by order
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      
+      // If orders are equal (or both undefined), sort by date (newest first)
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
 }
 
 
